@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The BLAND stack</title>
+    <link rel="stylesheet" href="deck.css" />
+    <script src="deck.js" defer></script>
+  </head>
+  <body>
+    <main class="slides">
+      <section id="title" class="title-slide">
+        <p class="eyebrow">Good Neighbor app // technical architecture</p>
+        <h1>The <span class="bland">BLAND</span> stack</h1>
+        <p class="lede">Bedrock, Lambda, API Gateway, Node.js and DynamoDB.</p>
+        <p class="byline">SF Mayor's Office of Innovation</p>
+        <ul class="facts">
+          <li><span>Runtime and compute</span>AWS Lambda / Node.js 24</li>
+          <li><span>Data and AI</span>DynamoDB + Bedrock</li>
+          <li><span>Frontend</span>Custom elements + Web Awesome</li>
+        </ul>
+      </section>
+
+      <section id="bland">
+        <p class="eyebrow">01 // The stack</p>
+        <h2>The core stack</h2>
+        <ul class="cards five acronym">
+          <li>
+            <span class="letter">B</span><strong>Bedrock</strong><span class="role">AI models</span>
+            Our photo analyzer runs models like Claude Sonnet here. No servers to run.
+          </li>
+          <li>
+            <span class="letter">L</span><strong>Lambda</strong><span class="role">Compute</span>
+            One function each for the API, the authorizer and every worker.
+          </li>
+          <li>
+            <span class="letter">A</span><strong>API Gateway</strong><span class="role">Front door</span>
+            One entry point. It checks each device token.
+          </li>
+          <li>
+            <span class="letter">N</span><strong>Node.js</strong><span class="role">Runtime</span>
+            Plain JavaScript. The TypeScript compiler checks its JSDoc types.
+          </li>
+          <li>
+            <span class="letter">D</span><strong>DynamoDB</strong><span class="role">Data</span>
+            One table, defined in Terraform.
+          </li>
+        </ul>
+        <p class="footnote">
+          Also in the stack: custom elements and Web Awesome, Vite, SQS, S3, CloudFront and
+          WAF, Cognito, Terraform, GitHub Actions.
+        </p>
+      </section>
+
+      <section id="sdlc">
+        <p class="eyebrow">02 // Foundation</p>
+        <h2>Built on the City's SDLC standard</h2>
+        <p class="lede">
+          We follow Level 2 of the CCSF Software Development Lifecycle Standard.
+        </p>
+        <ul class="cards four">
+          <li><strong>Everything in Git</strong> Code, infrastructure, pipelines, docs and config.</li>
+          <li><strong>Terraform only</strong> Remote state with locking. Plan and apply run in CI, never from a laptop.</li>
+          <li><strong>Tagged resources</strong> Seven CCSF tags on every cloud resource.</li>
+          <li><strong>No secrets in source</strong> Code points to Secrets Manager and Parameter Store.</li>
+          <li><strong>Managed services</strong> Each has only the IAM access it needs.</li>
+          <li><strong>Hardened edge</strong> TLS 1.2+, HSTS, CSP, CloudFront, WAF and rate limits.</li>
+          <li><strong>Core Web Vitals</strong> A bundle size budget and Lighthouse run on every pull request.</li>
+          <li><strong>Accessibility</strong> WCAG 2.2 AA target. Browser tests run axe checks.</li>
+        </ul>
+        <p class="footnote">Checklist: <code>docs/sdlc-level-2-checklist.md</code></p>
+      </section>
+
+      <section id="architecture">
+        <p class="eyebrow">03 // System topology</p>
+        <h2>Simplified network diagram</h2>
+        <svg class="diagram" viewBox="0 0 1180 430" role="img" aria-labelledby="arch-title arch-desc">
+          <title id="arch-title">Container view of the Good Neighbor app</title>
+          <desc id="arch-desc">
+            A field device reaches CloudFront and WAF. They serve the static frontend from S3 and route API calls to API Gateway. API Gateway checks a device token with an authorizer Lambda, then calls the api Lambda. The api Lambda reads and writes DynamoDB. Photos upload
+            straight from the device to a private S3 media bucket. The api Lambda queues foreground analysis in SQS for the analysis Lambda. The analysis Lambda calls the photo analyzer, our separate service that runs models on Bedrock. Then it stores the result in DynamoDB. The api Lambda also queues background jobs for the worker Lambda, which feeds a 311 queue. The 311 worker
+            Lambda calls the external Oracle HUB.
+          </desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 10 5 0 10z" />
+            </marker>
+          </defs>
+
+          <g class="edges">
+            <path d="M170 150H208" />
+            <path d="M290 120V72" />
+            <path d="M370 150H408" />
+            <path d="M490 120V72" />
+            <path d="M570 150H608" />
+            <path d="M770 150H808" />
+            <path class="dashed" d="M90 180V238" />
+            <path d="M720 180V238" />
+            <path d="M770 270H808" />
+            <path class="both" d="M972 270H1008" />
+            <path d="M890 240V182" />
+            <path d="M650 180V210H290V358" />
+            <path d="M370 390H408" />
+            <path d="M570 390H608" />
+            <path d="M770 390H808" />
+            <path class="both" d="M972 390H1008" />
+          </g>
+          <text class="edge-label" x="100" y="214">direct upload</text>
+          <text class="edge-label" x="900" y="214">stores result</text>
+
+          <g class="node"><rect x="10" y="120" width="160" height="60" rx="8" /><text x="90" y="146">Field device</text><text class="sub" x="90" y="166">browser app</text></g>
+          <g class="node"><rect x="210" y="120" width="160" height="60" rx="8" /><text x="290" y="156">CloudFront + WAF</text></g>
+          <g class="node store"><rect x="210" y="10" width="160" height="60" rx="8" /><text x="290" y="36">S3</text><text class="sub" x="290" y="56">static frontend</text></g>
+          <g class="node"><rect x="410" y="120" width="160" height="60" rx="8" /><text x="490" y="156">API Gateway</text></g>
+          <g class="node fn"><rect x="410" y="10" width="160" height="60" rx="8" /><text x="490" y="36">Lambda: authorizer</text><text class="sub" x="490" y="56">device tokens</text></g>
+          <g class="node fn"><rect x="610" y="120" width="160" height="60" rx="8" /><text x="690" y="146">Lambda: api</text><text class="sub" x="690" y="166">all route handlers</text></g>
+          <g class="node store"><rect x="810" y="120" width="160" height="60" rx="8" /><text x="890" y="146">DynamoDB</text><text class="sub" x="890" y="166">single table</text></g>
+          <g class="node store"><rect x="10" y="240" width="160" height="60" rx="8" /><text x="90" y="266">S3 media</text><text class="sub" x="90" y="286">private bucket</text></g>
+          <g class="node queue"><rect x="610" y="240" width="160" height="60" rx="8" /><text x="690" y="266">SQS</text><text class="sub" x="690" y="286">foreground analysis</text></g>
+          <g class="node fn"><rect x="810" y="240" width="160" height="60" rx="8" /><text x="890" y="276">Lambda: analysis</text></g>
+          <g class="node external"><rect x="1010" y="240" width="160" height="60" rx="8" /><text x="1090" y="266">Photo analyzer</text><text class="sub" x="1090" y="286">Sonnet on Bedrock</text></g>
+          <g class="node queue"><rect x="210" y="360" width="160" height="60" rx="8" /><text x="290" y="386">SQS</text><text class="sub" x="290" y="406">background jobs</text></g>
+          <g class="node fn"><rect x="410" y="360" width="160" height="60" rx="8" /><text x="490" y="396">Lambda: worker</text></g>
+          <g class="node queue"><rect x="610" y="360" width="160" height="60" rx="8" /><text x="690" y="386">SQS</text><text class="sub" x="690" y="406">311 jobs</text></g>
+          <g class="node fn"><rect x="810" y="360" width="160" height="60" rx="8" /><text x="890" y="396">Lambda: 311-worker</text></g>
+          <g class="node external"><rect x="1010" y="360" width="160" height="60" rx="8" /><text x="1090" y="386">Oracle HUB</text><text class="sub" x="1090" y="406">external 311</text></g>
+        </svg>
+        <ul class="legend">
+          <li style="--swatch: var(--accent)">Lambda</li>
+          <li style="--swatch: var(--amber)">Queue</li>
+          <li style="--swatch: var(--violet)">Storage</li>
+          <li style="--swatch: var(--muted)">Edge and client</li>
+        </ul>
+        <p class="footnote">
+          Full version: <code>docs/architecture.md</code>. Every Lambda also reads and writes
+          DynamoDB and the media bucket. Dashed boxes are separate services: our photo analyzer (the <code>street-conditions-analysis</code> repo) and the City's 311 system.
+        </p>
+      </section>
+
+      <section id="frontend">
+        <p class="eyebrow">04 // Frontend</p>
+        <h2>Frontend</h2>
+        <p class="lede">
+          No framework. Keeping the JavaScript small is how we meet Core Web Vitals.
+        </p>
+        <ul class="cards">
+          <li><strong>Native custom elements</strong> The browser's own component model.</li>
+          <li><strong>Web Awesome</strong> Shared form controls, icons, spinners and callouts. Buttons are native.</li>
+          <li><strong>Vite build with budgets</strong> Each route loads as its own chunk. CI checks a size limit on each. Main bundle: 77.3 kB JS, 22 kB CSS.</li>
+          <li><strong>Installable</strong> A web app manifest and an install prompt put it on the home screen.</li>
+          <li><strong>Opens offline</strong> A Workbox service worker precaches the built app. It never handles API calls.</li>
+          <li><strong>Offline queues</strong> The device saves care work logs and perimeter checks. It sends them when the connection returns.</li>
+        </ul>
+      </section>
+
+      <section id="docs">
+        <p class="eyebrow">05 // Documentation</p>
+        <h2>How the docs are organized</h2>
+        <ol class="steps">
+          <li>
+            <strong><code>AGENTS.md</code></strong>
+            Standing choices, SDLC rules and current state.
+          </li>
+          <li>
+            <strong><code>docs/README.md</code></strong>
+            The map. One line on what each document covers.
+          </li>
+          <li>
+            <strong>The issue tracker</strong>
+            Anything with a deadline. We delete plans once the work is built.
+          </li>
+        </ol>
+        <p class="eyebrow sub-eyebrow">What the map links to</p>
+        <ul class="cards stats">
+          <li>
+            <span class="num">18</span><strong>Reference docs</strong>
+            Architecture, data model, a worked check walkthrough, security review, localization, design system.
+          </li>
+          <li>
+            <span class="num">23</span><strong>Decision records</strong>
+            Short, numbered and never edited. A changed decision gets a new record. The old one points to it.
+          </li>
+          <li>
+            <span class="num">19</span><strong>Runbooks</strong>
+            Alerts, recovery drills, 311, device revocation, manager access, email, support chat.
+          </li>
+        </ul>
+        <p class="footnote">
+          60 documents, about 95,000 words.
+        </p>
+      </section>
+
+      <section id="local">
+        <p class="eyebrow">06 // Local development</p>
+        <h2>A local environment that mirrors AWS</h2>
+        <p class="lede">
+          <code>npm run dev</code> runs the same Lambda code against local stand-ins for DynamoDB,
+          SQS and S3.
+        </p>
+        <ul class="cards">
+          <li><strong>Same Lambda code</strong> A local router builds API Gateway events and calls the handlers directly. Workers poll the local queue.</li>
+          <li><strong>DynamoDB Local</strong> The single table, created and seeded on first run.</li>
+          <li><strong>SQS and S3</strong> ElasticMQ and MinIO, through the same AWS SDK clients.</li>
+          <li><strong>No Docker, no AWS login</strong> Needs only Node and a Java runtime. Works offline.</li>
+          <li><strong>Stubbed services</strong> Local stand-ins for the authorizer, the photo analyzer and 311.</li>
+          <li><strong>Tests use it too</strong> The browser tests start their own copy of the stack on their own ports.</li>
+        </ul>
+        <p class="footnote">
+          We check cloud wiring (IAM, API Gateway mappings, queue triggers) in the dev environment. Decision record: <code>docs/adr/0006-docker-free-local-dev-harness.md</code>
+        </p>
+      </section>
+
+      <section id="workflow">
+        <p class="eyebrow">07 // Working with agents</p>
+        <h2>Development workflow</h2>
+        <ol class="steps four">
+          <li><strong>Write</strong> A person and an AI agent write the change together.</li>
+          <li><strong>First review</strong> They review it before it leaves the laptop.</li>
+          <li><strong>Second review</strong> A separate agent reviews the pull request.</li>
+          <li><strong>CI</strong> Automated checks run, then the merge deploys to dev.</li>
+        </ol>
+        <ul class="cards two">
+          <li><strong>Agents never commit or push</strong> A person stages and commits every change.</li>
+          <li>
+            <strong>Disclosure review, every handoff</strong> The agent checks its changes for secrets and personal data before calling them ready.
+          </li>
+        </ul>
+        <p class="footnote">The rules for agents live in <code>AGENTS.md</code>.</p>
+      </section>
+
+      <section id="gates">
+        <p class="eyebrow">08 // Quality</p>
+        <h2>Quality gates</h2>
+        <div class="columns">
+          <div>
+            <h3>Before a commit <span class="badge">pre-commit</span></h3>
+            <ul>
+              <li>Secret scan (Gitleaks)</li>
+              <li>Terraform format and validate</li>
+              <li>Infrastructure policy scan (Checkov)</li>
+              <li>Large files, merge markers, YAML, whitespace</li>
+            </ul>
+          </div>
+          <div>
+            <h3>On every pull request <span class="badge">GitHub Actions</span></h3>
+            <ul>
+              <li>Format, lint, type check, unit tests, build</li>
+              <li>Browser tests in Chromium and WebKit, including offline launch</li>
+              <li>Bundle size budget and Lighthouse</li>
+              <li>Gitleaks and CodeQL</li>
+              <li>Terraform validate, tests and Checkov</li>
+              <li>Complete translations in every language</li>
+              <li>Actions pinned to commit SHAs; no AWS account IDs in source</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="deploys">
+        <p class="eyebrow">09 // Delivery</p>
+        <h2>Deploys and AWS access</h2>
+        <div class="columns">
+          <div>
+            <h3>Two branches, two environments <span class="badge">dev + prod</span></h3>
+            <ul>
+              <li><code>dev</code> branch: every merge deploys to dev.</li>
+              <li><code>main</code> branch: a published <code>v*</code> release deploys to prod once a named reviewer approves.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>OIDC, not access keys <span class="badge">GitHub to AWS</span></h3>
+            <ul>
+              <li>GitHub Actions trades a short-lived token for a deploy role. We store no long-lived keys.</li>
+              <li>Each environment has its own role. Only its own GitHub Environment can use it.</li>
+              <li>The job stops if it lands in the wrong AWS account.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="footnote">Decision record: <code>docs/adr/0007-deploy-promotion-model.md</code></p>
+      </section>
+
+      <section id="observability">
+        <p class="eyebrow">10 // Operations</p>
+        <h2>Observability</h2>
+        <ul class="cards">
+          <li><strong>Metrics are log lines</strong> We write business metrics in CloudWatch's embedded format. Every data point is also a searchable event with its ids.</li>
+          <li><strong>One ops dashboard</strong> Alarm status first, then activity, analyzer, queues and API. The charts show alarm thresholds.</li>
+          <li><strong>One email per incident</strong> Related failures share one alarm.</li>
+          <li><strong>Daily warning digest</strong> Minor failures arrive in one email.</li>
+          <li><strong>Outside-in uptime</strong> Route 53 checks <code>/health</code> through the full path.</li>
+          <li><strong>A runbook per alarm</strong> Each one says where to look first.</li>
+        </ul>
+        <p class="footnote">
+          CloudWatch is the source of truth. PostHog only carries client errors and feedback.
+        </p>
+      </section>
+
+      <section id="close">
+        <p class="eyebrow">11 // Where to look</p>
+        <h2>Where to start</h2>
+        <ol class="steps">
+          <li><strong><code>AGENTS.md</code></strong> Standing choices, rules and current state.</li>
+          <li><strong><code>docs/README.md</code></strong> The map of reference docs, decision records and runbooks.</li>
+          <li><strong>The issue tracker</strong> Open plans and work in progress.</li>
+        </ol>
+      </section>
+    </main>
+
+    <p class="hud"><span id="counter"></span></p>
+    <div class="progress" aria-hidden="true"></div>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "bland-stack-deck",
+  "version": "1.0.0",
+  "description": "A slide deck about the Good Neighbor app's architecture and engineering practices. Plain HTML, CSS and JavaScript with no dependencies and no build step.",
+  "main": "deck.js",
+  "scripts": {
+    "start": "npx http-server -o -c-1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

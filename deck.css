@@ -1,0 +1,515 @@
+/* The BLAND stack deck. No dependencies: sections snap to the viewport. */
+
+:root {
+  --bg: #090d16;
+  --card: #0f172a;
+  --rule: #1e293b;
+  --ink: #f8fafc;
+  --body: #cbd5e1;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --violet: #c084fc;
+  --green: #4ade80;
+  --amber: #fbbf24;
+
+  --sans: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: Montserrat, "Avenir Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+
+  /* Scales with both viewport dimensions so a slide fits any projector. */
+  font-size: clamp(14px, min(1.85vw, 3.3vh), 40px);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--body);
+  font-family: var(--sans);
+  line-height: 1.45;
+}
+
+section {
+  min-height: 100vh;
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  padding: 5vh 7vw 7vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+
+  > * {
+    margin: 0;
+  }
+}
+
+h1,
+h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  color: #fff;
+}
+
+h1 {
+  font-size: 3.6rem;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 1.9rem;
+  line-height: 1.15;
+  margin-top: -0.5rem;
+}
+
+h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0 0 0.6rem;
+}
+
+strong {
+  color: #fff;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  color: var(--accent);
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+}
+
+.lede {
+  font-size: 1.1rem;
+  color: var(--muted);
+  max-width: 38em;
+}
+
+.byline,
+.footnote {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.footnote {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+}
+
+.bland {
+  color: var(--accent);
+}
+
+.badge {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  font-weight: 400;
+  color: var(--accent);
+  background: var(--rule);
+  border-radius: 0.25rem;
+  padding: 0.2em 0.6em;
+  white-space: nowrap;
+}
+
+/* Title slides */
+.title-slide .lede {
+  font-size: 1.15rem;
+}
+
+.facts {
+  list-style: none;
+  padding: 1.2rem 0 0;
+  margin-top: 3rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  gap: 2.5rem;
+
+  li {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.85rem;
+  }
+
+  span {
+    display: block;
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* Cards */
+.cards {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+
+  &.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  &.five {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  li {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 0.4rem;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Counted cards */
+.stats .num {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--accent);
+}
+
+.sub-eyebrow {
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+/* The acronym: five tall cards */
+.acronym li {
+  min-height: 15rem;
+}
+
+.acronym .letter {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  color: var(--accent);
+}
+
+.acronym .role {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  margin: -0.15rem 0 0.7rem;
+}
+
+/* Numbered steps */
+.steps {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  li {
+    counter-increment: step;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--accent);
+    border-radius: 0.4rem;
+    padding: 0.8rem 0.9rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  li::before {
+    content: "0" counter(step);
+    display: block;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Two panels of bullets */
+.columns {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 0.8rem;
+
+  > div {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 0.4rem;
+    padding: 0.9rem 1rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1em;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+
+  li::marker {
+    color: var(--accent);
+  }
+}
+
+#deploys .columns {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Diagram */
+.diagram {
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+
+  .node rect {
+    fill: var(--card);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+  }
+
+  .fn rect {
+    stroke: var(--accent);
+  }
+
+  .queue rect {
+    stroke: var(--amber);
+  }
+
+  .store rect {
+    stroke: var(--violet);
+  }
+
+  .external rect {
+    fill: none;
+    stroke: var(--muted);
+    stroke-dasharray: 6 4;
+  }
+
+  text {
+    fill: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  .sub {
+    fill: var(--muted);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 400;
+  }
+
+  .edge-label {
+    fill: var(--muted);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 400;
+    text-anchor: start;
+  }
+
+  .edges path {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    marker-end: url(#arrow);
+  }
+
+  .edges .both {
+    marker-start: url(#arrow);
+  }
+
+  .edges .dashed {
+    stroke-dasharray: 5 4;
+  }
+
+  marker path {
+    fill: var(--muted);
+  }
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  color: var(--muted);
+
+  li::before {
+    content: "";
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    margin-right: 0.5em;
+    vertical-align: -0.1em;
+    border: 1.5px solid var(--swatch);
+    border-radius: 0.15em;
+  }
+}
+
+.hud {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 0.9rem;
+  margin: 0;
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(var(--progress, 0));
+  transition: transform 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress {
+    transition: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .cards,
+  .cards.two,
+  .cards.four,
+  .cards.five,
+  .steps,
+  .steps.four,
+  .columns,
+  #deploys .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .acronym li {
+    min-height: 0;
+  }
+
+  .facts {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+  }
+}
+
+/* Print on white to save ink. */
+@media print {
+  :root {
+    --bg: #fff;
+    --card: #fff;
+    --rule: #cbd5e1;
+    --ink: #0f172a;
+    --body: #1e293b;
+    --muted: #475569;
+    --accent: #0369a1;
+    --violet: #7e22ce;
+    --amber: #b45309;
+    color-scheme: light;
+  }
+
+  h1,
+  h2,
+  h3,
+  strong,
+  .diagram text {
+    color: #0f172a;
+    fill: #0f172a;
+  }
+
+  html {
+    scroll-snap-type: none;
+  }
+
+  section {
+    break-after: page;
+    break-inside: avoid;
+    height: 100vh;
+  }
+
+  .hud,
+  .progress {
+    display: none;
+  }
+}
