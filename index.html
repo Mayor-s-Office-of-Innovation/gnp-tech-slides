@@ -27,15 +27,15 @@
         <ul class="cards five acronym">
           <li>
             <span class="letter">B</span><strong>Bedrock</strong><span class="role">AI models</span>
-            Our photo analyzer runs models like Claude Sonnet here. No servers to run.
+            Our photo analyzer runs models like Claude Sonnet here.
           </li>
           <li>
             <span class="letter">L</span><strong>Lambda</strong><span class="role">Compute</span>
-            One function each for the API, the authorizer and every worker.
+            Functions for the API, the authorizer and workers.
           </li>
           <li>
             <span class="letter">A</span><strong>API Gateway</strong><span class="role">Front door</span>
-            One entry point. It checks each device token.
+            Entry point, caches and enforces lambda authorizer token allow/deny response
           </li>
           <li>
             <span class="letter">N</span><strong>Node.js</strong><span class="role">Runtime</span>
@@ -139,7 +139,7 @@
 
       <section id="frontend">
         <p class="eyebrow">04 // Frontend</p>
-        <h2>Frontend</h2>
+        <h2>Frontend: Use the web platform</h2>
         <p class="lede">
           No framework. Keeping the JavaScript small is how we meet Core Web Vitals.
         </p>
@@ -153,8 +153,28 @@
         </ul>
       </section>
 
+      <section id="backend">
+        <p class="eyebrow">05 // Backend</p>
+        <h2>Backend: Use managed services</h2>
+        <p class="lede">
+          AWS runs the infrastructure. We write the application logic.
+        </p>
+        <ul class="cards">
+          <li><strong>Lambda</strong> Managed compute. AWS patches the underlying OS; we maintain our code, dependencies and supported runtime version.</li>
+          <li><strong>DynamoDB</strong> A scalable database with no database versions to upgrade or database connection pools to manage.</li>
+          <li><strong>API Gateway</strong> Managed HTTP routing, throttling and authorizer integration. No API proxy servers to operate.</li>
+          <li><strong>S3</strong> Durable object storage that grows with our data. No storage servers or disks to provision.</li>
+          <li><strong>SQS</strong> Managed queues buffer background work. No message broker cluster to patch or scale.</li>
+          <li><strong>Bedrock</strong> AI models through an API. No GPUs to provision or model-serving infrastructure to maintain.</li>
+        </ul>
+        <p class="footnote">
+          Also: Cognito for admin sign-in, Secrets Manager for credentials, and
+          CloudWatch for logs, metrics and alarms.
+        </p>
+      </section>
+
       <section id="docs">
-        <p class="eyebrow">05 // Documentation</p>
+        <p class="eyebrow">06 // Documentation</p>
         <h2>How the docs are organized</h2>
         <ol class="steps">
           <li>
@@ -191,7 +211,7 @@
       </section>
 
       <section id="local">
-        <p class="eyebrow">06 // Local development</p>
+        <p class="eyebrow">07 // Local development</p>
         <h2>A local environment that mirrors AWS</h2>
         <p class="lede">
           <code>npm run dev</code> runs the same Lambda code against local stand-ins for DynamoDB,
@@ -199,8 +219,8 @@
         </p>
         <ul class="cards">
           <li><strong>Same Lambda code</strong> A local router builds API Gateway events and calls the handlers directly. Workers poll the local queue.</li>
-          <li><strong>DynamoDB Local</strong> The single table, created and seeded on first run.</li>
-          <li><strong>SQS and S3</strong> ElasticMQ and MinIO, through the same AWS SDK clients.</li>
+          <li><strong>DynamoDB Local</strong> AWS's official local database, running on Java. The single table is created and seeded on first run.</li>
+          <li><strong>SQS and S3</strong> SoftwareMill's ElasticMQ and MinIO provide local stand-ins. Both use the same official AWS SDK clients as production.</li>
           <li><strong>No Docker, no AWS login</strong> Needs only Node and a Java runtime. Works offline.</li>
           <li><strong>Stubbed services</strong> Local stand-ins for the authorizer, the photo analyzer and 311.</li>
           <li><strong>Tests use it too</strong> The browser tests start their own copy of the stack on their own ports.</li>
@@ -211,25 +231,25 @@
       </section>
 
       <section id="workflow">
-        <p class="eyebrow">07 // Working with agents</p>
+        <p class="eyebrow">08 // Working with agents</p>
         <h2>Development workflow</h2>
         <ol class="steps four">
-          <li><strong>Write</strong> A person and an AI agent write the change together.</li>
-          <li><strong>First review</strong> They review it before it leaves the laptop.</li>
-          <li><strong>Second review</strong> A separate agent reviews the pull request.</li>
-          <li><strong>CI</strong> Automated checks run, then the merge deploys to dev.</li>
+          <li><strong>Write and check</strong> A developer and an agent write the code. Security checks and Terraform validation run before commit.</li>
+          <li><strong>CI</strong> The pull request runs browser end-to-end tests, unit tests and Terraform validation.</li>
+          <li><strong>Agent review</strong> When the PR opens, a separate agent reviews the code and flags blocking issues.</li>
+          <li><strong>Human review</strong> After automated checks pass, a human reviews with an agent using a different model from the authoring model.</li>
         </ol>
         <ul class="cards two">
           <li><strong>Agents never commit or push</strong> A person stages and commits every change.</li>
           <li>
-            <strong>Disclosure review, every handoff</strong> The agent checks its changes for secrets and personal data before calling them ready.
+            <strong>Agents never merge or deploy</strong> A human controls merging and release approval. CI handles deployment.
           </li>
         </ul>
         <p class="footnote">The rules for agents live in <code>AGENTS.md</code>.</p>
       </section>
 
       <section id="gates">
-        <p class="eyebrow">08 // Quality</p>
+        <p class="eyebrow">09 // Quality</p>
         <h2>Quality gates</h2>
         <div class="columns">
           <div>
@@ -246,7 +266,8 @@
             <ul>
               <li>Format, lint, type check, unit tests, build</li>
               <li>Browser tests in Chromium and WebKit, including offline launch</li>
-              <li>Bundle size budget and Lighthouse</li>
+              <li>WCAG 2.2 AA scans (ramp-check / axe), keyboard, reduced motion and reflow</li>
+              <li>Bundle size limits block; Lighthouse LCP, CLS and TBT budgets warn</li>
               <li>Gitleaks and CodeQL</li>
               <li>Terraform validate, tests and Checkov</li>
               <li>Complete translations in every language</li>
@@ -257,7 +278,7 @@
       </section>
 
       <section id="deploys">
-        <p class="eyebrow">09 // Delivery</p>
+        <p class="eyebrow">10 // Delivery</p>
         <h2>Deploys and AWS access</h2>
         <div class="columns">
           <div>
@@ -280,7 +301,7 @@
       </section>
 
       <section id="observability">
-        <p class="eyebrow">10 // Operations</p>
+        <p class="eyebrow">11 // Operations</p>
         <h2>Observability</h2>
         <ul class="cards">
           <li><strong>Metrics are log lines</strong> We write business metrics in CloudWatch's embedded format. Every data point is also a searchable event with its ids.</li>
@@ -296,7 +317,7 @@
       </section>
 
       <section id="close">
-        <p class="eyebrow">11 // Where to look</p>
+        <p class="eyebrow">12 // Where to look</p>
         <h2>Where to start</h2>
         <ol class="steps">
           <li><strong><code>AGENTS.md</code></strong> Standing choices, rules and current state.</li>
